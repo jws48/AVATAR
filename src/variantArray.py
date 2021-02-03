@@ -27,8 +27,7 @@ def checkVersion():
 		raise Exception("Must be using Python 3")
 		print("\nType: module load python\n")
 
-def makeOutDirs(toplevel):
-	topOut = toplevel
+def makeOutDirs(topOut):
 	sam = os.path.join(topOut, "sam")
 	bam = os.path.join(topOut, "bam")
 	sortBam = os.path.join(topOut, "sort_bam")
@@ -49,8 +48,7 @@ def makeOutDirs(toplevel):
 		os.makedirs(vcf_filt)
 		
 
-def getRef(ref):
-	refDir = ref
+def getRef(refDir):
 	i = 0
 	for f in os.listdir(refDir):
 		if f.endswith((".fasta", ".fa")):
@@ -68,11 +66,7 @@ def getRef(ref):
 	return(fasta)
 
 
-def align(ref, pair1, pair2, out_dir):
-	refSeq = ref
-	read1 = pair1
-	read2 = pair2
-	out = out_dir
+def align(refSeq, read1, read2, out):
 
 	filename = os.path.basename(read1)
 	sample = filename.split('_')[0]
@@ -89,14 +83,10 @@ def align(ref, pair1, pair2, out_dir):
 
 	return(sample)
 
-def varCall(ref, name, baseQual, out_dir):
-	refSeq = ref
-	sample = name
-	bq = baseQual
-	out = out_dir
+def varCall(refSeq, sample, bq, out):
 	anno = "FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR"
 
-	os.system("\nCalling variants\n")
+	print("\nCalling variants\n")
 	os.system("bcftools mpileup --annotate {} -Q {} -d 300000 -f {} {}/sort_bam/{}_sort.bam \
 		| bcftools call -m --ploidy 1 --skip-variants indels > \
 		{}/vcf/unfiltered/{}.vcf".format(anno, bq, refSeq, out, sample, out, sample))
@@ -152,7 +142,7 @@ if __name__ == "__main__":
 	# create the output directory if needed
 	if not os.path.exists(out_dir):
 		os.makedirs(out_dir)
-
+	print("\nMinimum base quality set to {}\n".format(baseQual))
 	checkVersion()
 	makeOutDirs(out_dir)
 	ref_fasta = getRef(ref_dir)
